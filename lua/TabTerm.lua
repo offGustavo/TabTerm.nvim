@@ -27,10 +27,10 @@ function M.update_winbar()
 	end
 
 	if index then
-		local normal_bg = vim.api.nvim_get_hl_by_name("Normal", true).background
+		local normal_bg = vim.api.nvim_get_hl(0, { name = "Normal" }).bg
 		normal_bg = normal_bg and string.format("#%06x", normal_bg) or "NONE"
 
-		local tab_sel_bg = vim.api.nvim_get_hl_by_name("TablineSel", true).background
+		local tab_sel_bg = vim.api.nvim_get_hl(0, { name = "TablineSel" }).bg
 		tab_sel_bg = tab_sel_bg and string.format("#%06x", tab_sel_bg) or "NONE"
 
 		vim.api.nvim_set_hl(0, "TabTerminalSeparator", {
