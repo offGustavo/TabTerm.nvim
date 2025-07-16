@@ -11,10 +11,6 @@ M.config = {
 	default_highlight = "%#Tabline#",
 }
 
-function M.setup(user_config)
-	M.config = vim.tbl_extend("force", M.config, user_config or {})
-end
-
 function M.update_winbar()
 	local bufnr = vim.api.nvim_get_current_buf()
 
@@ -36,7 +32,7 @@ function M.update_winbar()
 		vim.api.nvim_set_hl(0, "TabTerminalSeparator", {
 			fg = tab_sel_bg,
 			bg = normal_bg,
-			bold = true,
+			bold = false,
 		})
 
 		local winbar = ""
