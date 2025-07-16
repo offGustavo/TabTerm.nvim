@@ -4,6 +4,17 @@ M.terminals = {}
 M.current_index = 1
 M.terminal_win = nil
 
+M.config = {
+	separator = "",
+	separator_highlight = nil,
+	tab_highlight = "%#TablineSel#",
+	default_highlight = "%#Tabline#",
+}
+
+function M.setup(user_config)
+	M.config = vim.tbl_extend("force", M.config, user_config or {})
+end
+
 function M.update_winbar()
 	local bufnr = vim.api.nvim_get_current_buf()
 
@@ -16,11 +27,29 @@ function M.update_winbar()
 	end
 
 	if index then
+		local normal_bg = vim.api.nvim_get_hl_by_name("Normal", true).background
+		normal_bg = normal_bg and string.format("#%06x", normal_bg) or "NONE"
+
+		local tab_sel_bg = vim.api.nvim_get_hl_by_name("TablineSel", true).background
+		tab_sel_bg = tab_sel_bg and string.format("#%06x", tab_sel_bg) or "NONE"
+
+		vim.api.nvim_set_hl(0, "TabTerminalSeparator", {
+			fg = tab_sel_bg,
+			bg = normal_bg,
+			bold = true,
+		})
+
 		local winbar = ""
 		for i, term in ipairs(M.terminals) do
 			if i == index then
-				-- FIXME: add style here
-				winbar = winbar .. string.format("%%#TablineSel# [%d:%s] %%*", i, term.name)
+				winbar = winbar
+					.. string.format(
+						"%s [%d:%s] %%#TabTerminalSeparator#%s%%*",
+						M.config.tab_highlight,
+						i,
+						term.name,
+						M.config.separator
+					)
 			else
 				winbar = winbar .. string.format(" [%d:%s] ", i, term.name)
 			end
@@ -181,7 +210,9 @@ function M.goto_terminal(index)
 	M.update_winbar()
 end
 
-function M.setup()
+function M.setup(user_config)
+	M.config = vim.tbl_extend("force", M.config, user_config or {})
+
 	vim.api.nvim_create_user_command("TabTerminalToggle", M.toggle_terminal_window, {})
 	vim.api.nvim_create_user_command("TabTerminalNew", M.new_terminal, {})
 	vim.api.nvim_create_user_command("TabTerminalClose", function(opts)
