@@ -1,5 +1,6 @@
 local M = {}
 
+-- TODO: Criar uma forma que permia queo terminal seja mostrado em uma janela flutuante
 M.terminals = {}
 M.current_index = 1
 M.terminal_win = nil
@@ -11,7 +12,7 @@ M.config = {
 	default_highlight = "%#Tabline#",
 }
 
-function M.update_winbar()
+local function updateWinbar()
 	local bufnr = vim.api.nvim_get_current_buf()
 
 	local index = nil
@@ -72,7 +73,7 @@ function M.find_terminal_window()
 	return nil
 end
 
-function M.new_terminal(name)
+function M.new(name)
 	name = name or ("term" .. (#M.terminals + 1))
 
 	local win = M.find_terminal_window()
@@ -89,14 +90,14 @@ function M.new_terminal(name)
 	table.insert(M.terminals, { bufnr = bufnr, name = name })
 	M.current_index = #M.terminals
 
-	M.update_winbar()
+	updateWinbar()
 
 	vim.schedule(function()
-		M.update_winbar()
+		updateWinbar()
 	end)
 end
 
-function M.close_terminal(index)
+function M.close(index)
 	if not index then
 		local bufnr = vim.api.nvim_get_current_buf()
 		for i, term in ipairs(M.terminals) do
@@ -106,14 +107,15 @@ function M.close_terminal(index)
 			end
 		end
 		if not index then
-			print("O buffer atual não é um terminal do plugin.")
+			print("Not a Terminal Buffer")
 			return
 		end
 	end
 
 	local term = M.terminals[index]
 	if not term then
-		print("Terminal " .. index .. " não existe.")
+		-- FIXME: wrong speel
+		print("Terminal " .. index .. " dosen't exists.")
 		return
 	end
 
@@ -142,11 +144,11 @@ function M.close_terminal(index)
 		end
 
 		vim.api.nvim_set_current_buf(M.terminals[M.current_index].bufnr)
-		M.update_winbar()
+		updateWinbar()
 	end
 end
 
-function M.toggle_terminal_window()
+function M.toggle()
 	local win = M.find_terminal_window()
 	if win then
 		vim.api.nvim_win_close(win, true)
@@ -155,13 +157,13 @@ function M.toggle_terminal_window()
 		vim.cmd("split")
 		M.terminal_win = vim.api.nvim_get_current_win()
 		vim.api.nvim_set_current_buf(M.terminals[M.current_index].bufnr)
-		M.update_winbar()
+		updateWinbar()
 	else
-		M.new_terminal()
+		M.new()
 	end
 end
 
-function M.rename_terminal(index, new_name)
+function M.rename(index, new_name)
 	if not index then
 		local bufnr = vim.api.nvim_get_current_buf()
 		for i, term in ipairs(M.terminals) do
@@ -179,7 +181,7 @@ function M.rename_terminal(index, new_name)
 	local term = M.terminals[index]
 	if term then
 		term.name = new_name or term.name
-		M.update_winbar()
+		updateWinbar()
 		return true
 	else
 		print("Terminal " .. index .. " não existe.")
@@ -187,7 +189,7 @@ function M.rename_terminal(index, new_name)
 	end
 end
 
-function M.goto_terminal(index)
+function M.goto(index)
 	local term = M.terminals[index]
 	if not term then
 		print("Terminal " .. index .. " não existe.")
@@ -203,51 +205,53 @@ function M.goto_terminal(index)
 		M.terminal_win = vim.api.nvim_get_current_win()
 	end
 	vim.api.nvim_set_current_buf(term.bufnr)
-	M.update_winbar()
+	updateWinbar()
 end
 
 function M.setup(user_config)
 	M.config = vim.tbl_extend("force", M.config, user_config or {})
 
-	vim.api.nvim_create_user_command("TabTerminalToggle", M.toggle_terminal_window, {})
-	vim.api.nvim_create_user_command("TabTerminalNew", M.new_terminal, {})
-	vim.api.nvim_create_user_command("TabTerminalClose", function(opts)
+	vim.api.nvim_create_user_command("TabTermToggle", M.toggle, {})
+	vim.api.nvim_create_user_command("TabTermNew", M.new, {})
+	-- FIXME: pass the logic to module function
+	vim.api.nvim_create_user_command("TabTermClose", function(opts)
 		if opts.args ~= "" then
 			local idx = tonumber(opts.args)
 			if idx then
-				M.close_terminal(idx)
+				M.close(idx)
 			end
 		else
-			M.close_terminal(nil)
+			M.close(nil)
 		end
 	end, { nargs = "?" })
-
-	vim.api.nvim_create_user_command("TabTerminalRename", function(opts)
+	-- FIXME: pass the logic to module function
+	vim.api.nvim_create_user_command("TabTermRename", function(opts)
 		if opts.args ~= "" then
 			if opts.args:find(":") then
 				local index, new_name = opts.args:match("(%d+):(.+)")
 				if index and new_name then
-					M.rename_terminal(tonumber(index), new_name)
+					M.rename(tonumber(index), new_name)
 				end
 			else
-				M.rename_terminal(nil, opts.args)
+				M.rename(nil, opts.args)
 			end
 		else
-			vim.ui.input({ prompt = "Novo nome para o terminal: " }, function(input)
+			vim.ui.input({ prompt = "New Name: " }, function(input)
 				if input then
-					M.rename_terminal(nil, input)
+					M.rename(nil, input)
 				end
 			end)
 		end
 	end, { nargs = "?" })
 
-	vim.api.nvim_create_autocmd({ "BufEnter", "TermEnter" }, {
-		callback = function()
-			M.update_winbar()
-		end,
-	})
+	--TODO: modificar esse autocmd
+	-- vim.api.nvim_create_autocmd({ "BufEnter", "TermEnter" }, {
+	-- 	callback = function()
+	-- 		updateWinbar()
+	-- 	end,
+	-- })
 end
 
-_G.TabTerminal = M
+_G.TabTerm = M
 
 return M
