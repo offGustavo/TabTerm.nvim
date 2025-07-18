@@ -30,27 +30,42 @@ local function updateWinbar()
 		local get_tab_sel_bg = vim.api.nvim_get_hl(0, { name = "TablineSel" }).bg
 		local tab_sel_bg = get_tab_sel_bg and string.format("#%06x", get_tab_sel_bg) or "NONE"
 
-		vim.api.nvim_set_hl(0, "TabTerminalSeparator", {
+		vim.api.nvim_set_hl(0, "TabTermSeparator", {
 			fg = tab_sel_bg,
 			bg = normal_bg,
 			bold = false,
 		})
 
+    -- TODO: Fazer isso mais personalizavél, permitindo que usuário escolha
+		-- local winbar = "%="
 		local winbar = ""
 		for i, term in ipairs(M.terminals) do
+      if i == 1 and i == index then
+				winbar = winbar
+					.. string.format(
+						"%s %d:%s %%#TabTermSeparator#%s%%*",
+						M.config.tab_highlight,
+						i,
+						term.name,
+						M.config.separator
+					)
+      else
 			if i == index then
 				winbar = winbar
 					.. string.format(
-						"%s [%d:%s] %%#TabTerminalSeparator#%s%%*",
+						"%%#TabTermSeparator#%s %d:%s %%#TabTermSeparator#%s%%*",
 						M.config.tab_highlight,
 						i,
 						term.name,
 						M.config.separator
 					)
 			else
-				winbar = winbar .. string.format(" [%d:%s] ", i, term.name)
+				winbar = winbar .. string.format("  %d:%s  ", i, term.name)
 			end
+      end
 		end
+
+		-- winbar = winbar ..  "%="
 		vim.wo.winbar = winbar
 	else
 		vim.wo.winbar = ""
@@ -74,27 +89,32 @@ function M.find_terminal_window()
 end
 
 function M.new(name)
-	name = name or ("term" .. (#M.terminals + 1))
+    name = name or ("term" .. (#M.terminals + 1))
 
-	local win = M.find_terminal_window()
-	if win then
-		vim.api.nvim_set_current_win(win)
-	else
-		vim.cmd("split")
-		M.terminal_win = vim.api.nvim_get_current_win()
-	end
+    local win = M.find_terminal_window()
+    if win then
+        vim.api.nvim_set_current_win(win)
+    else
+        vim.cmd("split")
+        M.terminal_win = vim.api.nvim_get_current_win()
+    end
 
-	vim.cmd("term")
-	local bufnr = vim.api.nvim_get_current_buf()
+    vim.cmd("term")
+    local bufnr = vim.api.nvim_get_current_buf()
+    
+    -- Marcar apenas os buffers criados pelo TabTerm como não listados
+    vim.api.nvim_buf_set_option(bufnr, 'buflisted', false)
+    -- Adicionar uma variável de buffer para identificar que foi criado pelo TabTerm
+    vim.api.nvim_buf_set_var(bufnr, 'tabterm_created', true)
+    
+    table.insert(M.terminals, { bufnr = bufnr, name = name })
+    M.current_index = #M.terminals
 
-	table.insert(M.terminals, { bufnr = bufnr, name = name })
-	M.current_index = #M.terminals
+    updateWinbar()
 
-	updateWinbar()
-
-	vim.schedule(function()
-		updateWinbar()
-	end)
+    vim.schedule(function()
+        updateWinbar()
+    end)
 end
 
 function M.close(index)
@@ -209,10 +229,19 @@ function M.goto(index)
 end
 
 function M.setup(user_config)
-	M.config = vim.tbl_extend("force", M.config, user_config or {})
+    M.config = vim.tbl_extend("force", M.config, user_config or {})
 
-	vim.api.nvim_create_user_command("TabTermToggle", M.toggle, {})
-	vim.api.nvim_create_user_command("TabTermNew", M.new, {})
+    vim.api.nvim_create_autocmd("TermOpen", {
+        callback = function(args)
+            local is_tabterm = pcall(vim.api.nvim_buf_get_var, args.buf, 'tabterm_created')
+            if is_tabterm then
+                vim.api.nvim_buf_set_option(args.buf, 'buflisted', false)
+            end
+        end,
+    })
+
+    vim.api.nvim_create_user_command("TabTermToggle", M.toggle, {})
+    vim.api.nvim_create_user_command("TabTermNew", M.new, {})
 	-- FIXME: pass the logic to module function
 	vim.api.nvim_create_user_command("TabTermClose", function(opts)
 		if opts.args ~= "" then
