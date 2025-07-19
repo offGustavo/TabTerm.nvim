@@ -275,6 +275,30 @@ function M.setup(user_config)
     M.rename(opts.args)
   end, { nargs = "?" })
 
+vim.api.nvim_create_user_command("TabTermGoTo", function(opts)
+  local index = tonumber(opts.args) or 1 -- padrão para 1 se não for número
+  M.goto(index)
+end, { nargs = "?" })
+
+function M.goto(index)
+  local term = terminals[index]
+  if not term then
+    print("Terminal " .. (index or "?") .. " não existe.")
+    return
+  end
+
+  current_index = index
+  local win = find_terminal_window()
+  if win then
+    vim.api.nvim_set_current_win(win)
+  else
+    vim.cmd("split")
+    M.terminal_win = vim.api.nvim_get_current_win()
+  end
+  vim.api.nvim_set_current_buf(term.bufnr)
+  updateWinbar()
+end
+
   --TODO: modificar esse autocmd
   -- vim.api.nvim_create_autocmd({ "BufEnter", "TermEnter" }, {
   -- 	callback = function()
