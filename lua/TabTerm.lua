@@ -1,281 +1,282 @@
 local M = {}
 
 -- TODO: Criar uma forma que permia queo terminal seja mostrado em uma janela flutuante
-M.terminals = {}
-M.current_index = 1
+local terminals = {}
+local current_index = 1
 M.terminal_win = nil
 
-M.config = {
-	separator = "",
-	separator_highlight = nil,
-	tab_highlight = "%#TablineSel#",
-	default_highlight = "%#Tabline#",
+local config = {
+  separator = "",
+  separator_highlight = nil,
+  tab_highlight = "%#TablineSel#",
+  default_highlight = "%#Tabline#",
 }
 
 local function updateWinbar()
-	local bufnr = vim.api.nvim_get_current_buf()
+  local bufnr = vim.api.nvim_get_current_buf()
 
-	local index = nil
-	for i, term in ipairs(M.terminals) do
-		if term.bufnr == bufnr then
-			index = i
-			break
-		end
-	end
+  local index = nil
+  for i, term in ipairs(terminals) do
+    if term.bufnr == bufnr then
+      index = i
+      break
+    end
+  end
 
-	if index then
-		local get_normal_bg = vim.api.nvim_get_hl(0, { name = "Normal" }).bg
-		local normal_bg = get_normal_bg and string.format("#%06x", get_normal_bg) or "NONE"
+  if index then
+    local get_normal_bg = vim.api.nvim_get_hl(0, { name = "Normal" }).bg
+    local normal_bg = get_normal_bg and string.format("#%06x", get_normal_bg) or "NONE"
 
-		local get_tab_sel_bg = vim.api.nvim_get_hl(0, { name = "TablineSel" }).bg
-		local tab_sel_bg = get_tab_sel_bg and string.format("#%06x", get_tab_sel_bg) or "NONE"
+    local get_tab_sel_bg = vim.api.nvim_get_hl(0, { name = "TablineSel" }).bg
+    local tab_sel_bg = get_tab_sel_bg and string.format("#%06x", get_tab_sel_bg) or "NONE"
 
-		vim.api.nvim_set_hl(0, "TabTermSeparator", {
-			fg = tab_sel_bg,
-			bg = normal_bg,
-			bold = false,
-		})
+    vim.api.nvim_set_hl(0, "TabTermSeparator", {
+      fg = tab_sel_bg,
+      bg = normal_bg,
+      bold = false,
+    })
 
     -- TODO: Fazer isso mais personalizavél, permitindo que usuário escolha
-		-- local winbar = "%="
-		local winbar = ""
-		for i, term in ipairs(M.terminals) do
+    -- local winbar = "%="
+    local winbar = ""
+    for i, term in ipairs(terminals) do
       if i == 1 and i == index then
-				winbar = winbar
-					.. string.format(
-						"%s %d:%s %%#TabTermSeparator#%s%%*",
-						M.config.tab_highlight,
-						i,
-						term.name,
-						M.config.separator
-					)
+        winbar = winbar
+        .. string.format(
+          "%s %d:%s %%#TabTermSeparator#%s%%*",
+          config.tab_highlight,
+          i,
+          term.name,
+          config.separator
+        )
       else
-			if i == index then
-				winbar = winbar
-					.. string.format(
-						"%%#TabTermSeparator#%s %d:%s %%#TabTermSeparator#%s%%*",
-						M.config.tab_highlight,
-						i,
-						term.name,
-						M.config.separator
-					)
-			else
-				winbar = winbar .. string.format("  %d:%s  ", i, term.name)
-			end
+        if i == index then
+          winbar = winbar
+          .. string.format(
+            "%%#TabTermSeparator#%s %d:%s %%#TabTermSeparator#%s%%*",
+            config.tab_highlight,
+            i,
+            term.name,
+            config.separator
+          )
+        else
+          winbar = winbar .. string.format("  %d:%s  ", i, term.name)
+        end
       end
-		end
+    end
 
-		-- winbar = winbar ..  "%="
-		vim.wo.winbar = winbar
-	else
-		vim.wo.winbar = ""
-	end
+    -- winbar = winbar ..  "%="
+    vim.wo.winbar = winbar
+  else
+    vim.wo.winbar = ""
+  end
 end
 
-function M.find_terminal_window()
-	if M.terminal_win and vim.api.nvim_win_is_valid(M.terminal_win) then
-		return M.terminal_win
-	end
-	for _, win in ipairs(vim.api.nvim_list_wins()) do
-		local bufnr = vim.api.nvim_win_get_buf(win)
-		for _, term in ipairs(M.terminals) do
-			if term.bufnr == bufnr then
-				M.terminal_win = win
-				return win
-			end
-		end
-	end
-	return nil
+local function find_terminal_window()
+  if M.terminal_win and vim.api.nvim_win_is_valid(M.terminal_win) then
+    return M.terminal_win
+  end
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local bufnr = vim.api.nvim_win_get_buf(win)
+    for _, term in ipairs(terminals) do
+      if term.bufnr == bufnr then
+        M.terminal_win = win
+        return win
+      end
+    end
+  end
+  return nil
 end
 
 function M.new(name)
-    name = name or ("term" .. (#M.terminals + 1))
+  name = name or ("term" .. (#terminals + 1))
 
-    local win = M.find_terminal_window()
-    if win then
-        vim.api.nvim_set_current_win(win)
-    else
-        vim.cmd("split")
-        M.terminal_win = vim.api.nvim_get_current_win()
-    end
+  local win = find_terminal_window()
+  if win then
+    vim.api.nvim_set_current_win(win)
+  else
+    vim.cmd("split")
+    M.terminal_win = vim.api.nvim_get_current_win()
+  end
 
-    vim.cmd("term")
-    local bufnr = vim.api.nvim_get_current_buf()
-    
-    -- Marcar apenas os buffers criados pelo TabTerm como não listados
-    vim.api.nvim_buf_set_option(bufnr, 'buflisted', false)
-    -- Adicionar uma variável de buffer para identificar que foi criado pelo TabTerm
-    vim.api.nvim_buf_set_var(bufnr, 'tabterm_created', true)
-    
-    table.insert(M.terminals, { bufnr = bufnr, name = name })
-    M.current_index = #M.terminals
+  vim.cmd("term")
+  local bufnr = vim.api.nvim_get_current_buf()
 
+  -- Marcar apenas os buffers criados pelo TabTerm como não listados
+  vim.api.nvim_buf_set_option(bufnr, 'buflisted', false)
+  -- Adicionar uma variável de buffer para identificar que foi criado pelo TabTerm
+  vim.api.nvim_buf_set_var(bufnr, 'tabterm_created', true)
+
+  table.insert(terminals, { bufnr = bufnr, name = name })
+  current_index = #terminals
+
+  updateWinbar()
+
+  vim.schedule(function()
     updateWinbar()
-
-    vim.schedule(function()
-        updateWinbar()
-    end)
+  end)
 end
 
 function M.close(index)
-	if not index then
-		local bufnr = vim.api.nvim_get_current_buf()
-		for i, term in ipairs(M.terminals) do
-			if term.bufnr == bufnr then
-				index = i
-				break
-			end
-		end
-		if not index then
-			print("Not a Terminal Buffer")
-			return
-		end
-	end
+  if not index then
+    local bufnr = vim.api.nvim_get_current_buf()
+    for i, term in ipairs(terminals) do
+      if term.bufnr == bufnr then
+        index = i
+        break
+      end
+    end
+    if not index then
+      print("Not a Terminal Buffer")
+      return
+    end
+  end
 
-	local term = M.terminals[index]
-	if not term then
-		-- FIXME: wrong speel
-		print("Terminal " .. index .. " dosen't exists.")
-		return
-	end
+  local term = terminals[index]
+  if not term then
+    -- FIXME: wrong speel
+    print("Terminal " .. index .. " dosen't exists.")
+    return
+  end
 
-	vim.api.nvim_buf_delete(term.bufnr, { force = true })
-	table.remove(M.terminals, index)
+  vim.api.nvim_buf_delete(term.bufnr, { force = true })
+  table.remove(terminals, index)
 
-	if #M.terminals == 0 then
-		M.current_index = 1
-		if M.terminal_win and vim.api.nvim_win_is_valid(M.terminal_win) then
-			vim.api.nvim_set_current_win(M.terminal_win)
-			vim.cmd("enew")
-			vim.wo.winbar = ""
-		else
-			M.terminal_win = nil
-		end
-	else
-		if M.current_index > #M.terminals then
-			M.current_index = #M.terminals
-		end
+  if #terminals == 0 then
+    current_index = 1
+    if M.terminal_win and vim.api.nvim_win_is_valid(M.terminal_win) then
+      vim.api.nvim_set_current_win(M.terminal_win)
+      vim.cmd("enew")
+      vim.wo.winbar = ""
+    else
+      M.terminal_win = nil
+    end
+  else
+    if current_index > #terminals then
+      current_index = #terminals
+    end
 
-		if not (M.terminal_win and vim.api.nvim_win_is_valid(M.terminal_win)) then
-			vim.cmd("split")
-			M.terminal_win = vim.api.nvim_get_current_win()
-		else
-			vim.api.nvim_set_current_win(M.terminal_win)
-		end
+    if not (M.terminal_win and vim.api.nvim_win_is_valid(M.terminal_win)) then
+      vim.cmd("split")
+      M.terminal_win = vim.api.nvim_get_current_win()
+    else
+      vim.api.nvim_set_current_win(M.terminal_win)
+    end
 
-		vim.api.nvim_set_current_buf(M.terminals[M.current_index].bufnr)
-		updateWinbar()
-	end
+    vim.api.nvim_set_current_buf(terminals[current_index].bufnr)
+    updateWinbar()
+  end
 end
 
 function M.toggle()
-	local win = M.find_terminal_window()
-	if win then
-		vim.api.nvim_win_close(win, true)
-		M.terminal_win = nil
-	elseif #M.terminals > 0 then
-		vim.cmd("split")
-		M.terminal_win = vim.api.nvim_get_current_win()
-		vim.api.nvim_set_current_buf(M.terminals[M.current_index].bufnr)
-		updateWinbar()
-	else
-		M.new()
-	end
+  local win = find_terminal_window()
+  if win then
+    vim.api.nvim_win_close(win, true)
+    M.terminal_win = nil
+  elseif #terminals > 0 then
+    vim.cmd("split")
+    M.terminal_win = vim.api.nvim_get_current_win()
+    vim.api.nvim_set_current_buf(terminals[current_index].bufnr)
+    updateWinbar()
+  else
+    M.new()
+  end
 end
 
 function M.rename(input)
-	-- Se nenhum input foi passado, pedir ao usuário
-	if not input or input == "" then
-		vim.ui.input({ prompt = "New Name: " }, function(user_input)
-			if user_input and user_input ~= "" then
-				M.rename(user_input)
-			end
-		end)
-		return
-	end
+  -- Se nenhum input foi passado, pedir ao usuário
+  if not input or input == "" then
+    vim.ui.input({ prompt = "New Name: " }, function(user_input)
+      if user_input and user_input ~= "" then
+        M.rename(user_input)
+      end
+    end)
+    return
+  end
 
-	local index, new_name = input:match("^(%d+):(.+)$")
-	if index and new_name then
-		index = tonumber(index)
-		if M.terminals[index] then
-			M.terminals[index].name = new_name
-			updateWinbar()
-		else
-			print("Terminal " .. index .. " dosen't exists.")
-		end
-		return
-	end
+  local index, new_name = input:match("^(%d+):(.+)$")
+  if index and new_name then
+    index = tonumber(index)
+    if terminals[index] then
+      terminals[index].name = new_name
+      updateWinbar()
+    else
+      print("Terminal " .. index .. " dosen't exists.")
+    end
+    return
+  end
 
-	-- Caso contrário: input é só o nome novo, então usa o buffer atual
-	local bufnr = vim.api.nvim_get_current_buf()
-	for i, term in ipairs(M.terminals) do
-		if term.bufnr == bufnr then
-			M.terminals[i].name = input
-			updateWinbar()
-			return
-		end
-	end
+  -- Caso contrário: input é só o nome novo, então usa o buffer atual
+  local bufnr = vim.api.nvim_get_current_buf()
+  for i, term in ipairs(terminals) do
+    if term.bufnr == bufnr then
+      terminals[i].name = input
+      updateWinbar()
+      return
+    end
+  end
   -- TODO: Melhorar as mensagens de erro
-	print("Can't rename, the current buffers is not a tabterm terminal.")
+  print("Can't rename, the current buffers is not a tabterm terminal.")
 end
 
 
 function M.goto(index)
-	local term = M.terminals[index]
-	if not term then
-		print("Terminal " .. index .. " não existe.")
-		return
-	end
+  local term = terminals[index]
+  if not term then
+    print("Terminal " .. index .. " não existe.")
+    return
+  end
 
-	M.current_index = index
-	local win = M.find_terminal_window()
-	if win then
-		vim.api.nvim_set_current_win(win)
-	else
-		vim.cmd("split")
-		M.terminal_win = vim.api.nvim_get_current_win()
-	end
-	vim.api.nvim_set_current_buf(term.bufnr)
-	updateWinbar()
+  current_index = index
+  local win = find_terminal_window()
+  if win then
+    vim.api.nvim_set_current_win(win)
+  else
+    vim.cmd("split")
+    M.terminal_win = vim.api.nvim_get_current_win()
+  end
+  vim.api.nvim_set_current_buf(term.bufnr)
+  updateWinbar()
 end
 
 function M.setup(user_config)
-    M.config = vim.tbl_extend("force", M.config, user_config or {})
+  config = vim.tbl_extend("force", config, user_config or {})
 
-    vim.api.nvim_create_autocmd("TermOpen", {
-        callback = function(args)
-            local is_tabterm = pcall(vim.api.nvim_buf_get_var, args.buf, 'tabterm_created')
-            if is_tabterm then
-                vim.api.nvim_buf_set_option(args.buf, 'buflisted', false)
-            end
-        end,
-    })
+  vim.api.nvim_create_autocmd("TermOpen", {
+    callback = function(args)
+      local is_tabterm = pcall(vim.api.nvim_buf_get_var, args.buf, 'tabterm_created')
+      if is_tabterm then
+        vim.api.nvim_buf_set_option(args.buf, 'buflisted', false)
+      end
+    end,
+  })
 
-    vim.api.nvim_create_user_command("TabTermToggle", M.toggle, {})
-    vim.api.nvim_create_user_command("TabTermNew", M.new, {})
+  vim.api.nvim_create_user_command("TabTermToggle", M.toggle, {})
 
-	-- FIXME: pass the logic to module function
-	vim.api.nvim_create_user_command("TabTermClose", function(opts)
-		if opts.args ~= "" then
-			local idx = tonumber(opts.args)
-			if idx then
-				M.close(idx)
-			end
-		else
-			M.close(nil)
-		end
-	end, { nargs = "?" })
+  vim.api.nvim_create_user_command("TabTermNew", M.new, {})
 
-vim.api.nvim_create_user_command("TabTermRename", function(opts)
-	M.rename(opts.args)
-end, { nargs = "?" })
+  -- FIXME: pass the logic to module function
+  vim.api.nvim_create_user_command("TabTermClose", function(opts)
+    if opts.args ~= "" then
+      local idx = tonumber(opts.args)
+      if idx then
+        M.close(idx)
+      end
+    else
+      M.close(nil)
+    end
+  end, { nargs = "?" })
 
-	--TODO: modificar esse autocmd
-	-- vim.api.nvim_create_autocmd({ "BufEnter", "TermEnter" }, {
-	-- 	callback = function()
-	-- 		updateWinbar()
-	-- 	end,
-	-- })
+  vim.api.nvim_create_user_command("TabTermRename", function(opts)
+    M.rename(opts.args)
+  end, { nargs = "?" })
+
+  --TODO: modificar esse autocmd
+  -- vim.api.nvim_create_autocmd({ "BufEnter", "TermEnter" }, {
+  -- 	callback = function()
+  -- 		updateWinbar()
+  -- 	end,
+  -- })
 end
 
 _G.TabTerm = M
