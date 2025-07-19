@@ -183,31 +183,42 @@ function M.toggle()
 	end
 end
 
-function M.rename(index, new_name)
-	if not index then
-		local bufnr = vim.api.nvim_get_current_buf()
-		for i, term in ipairs(M.terminals) do
-			if term.bufnr == bufnr then
-				index = i
-				break
+function M.rename(input)
+	-- Se nenhum input foi passado, pedir ao usuário
+	if not input or input == "" then
+		vim.ui.input({ prompt = "New Name: " }, function(user_input)
+			if user_input and user_input ~= "" then
+				M.rename(user_input)
 			end
+		end)
+		return
+	end
+
+	local index, new_name = input:match("^(%d+):(.+)$")
+	if index and new_name then
+		index = tonumber(index)
+		if M.terminals[index] then
+			M.terminals[index].name = new_name
+			updateWinbar()
+		else
+			print("Terminal " .. index .. " dosen't exists.")
 		end
-		if not index then
-			print("O buffer atual não é um terminal do plugin.")
+		return
+	end
+
+	-- Caso contrário: input é só o nome novo, então usa o buffer atual
+	local bufnr = vim.api.nvim_get_current_buf()
+	for i, term in ipairs(M.terminals) do
+		if term.bufnr == bufnr then
+			M.terminals[i].name = input
+			updateWinbar()
 			return
 		end
 	end
-
-	local term = M.terminals[index]
-	if term then
-		term.name = new_name or term.name
-		updateWinbar()
-		return true
-	else
-		print("Terminal " .. index .. " não existe.")
-		return false
-	end
+  -- TODO: Melhorar as mensagens de erro
+	print("Can't rename, the current buffers is not a tabterm terminal.")
 end
+
 
 function M.goto(index)
 	local term = M.terminals[index]
@@ -242,6 +253,7 @@ function M.setup(user_config)
 
     vim.api.nvim_create_user_command("TabTermToggle", M.toggle, {})
     vim.api.nvim_create_user_command("TabTermNew", M.new, {})
+
 	-- FIXME: pass the logic to module function
 	vim.api.nvim_create_user_command("TabTermClose", function(opts)
 		if opts.args ~= "" then
@@ -253,25 +265,10 @@ function M.setup(user_config)
 			M.close(nil)
 		end
 	end, { nargs = "?" })
-	-- FIXME: pass the logic to module function
-	vim.api.nvim_create_user_command("TabTermRename", function(opts)
-		if opts.args ~= "" then
-			if opts.args:find(":") then
-				local index, new_name = opts.args:match("(%d+):(.+)")
-				if index and new_name then
-					M.rename(tonumber(index), new_name)
-				end
-			else
-				M.rename(nil, opts.args)
-			end
-		else
-			vim.ui.input({ prompt = "New Name: " }, function(input)
-				if input then
-					M.rename(nil, input)
-				end
-			end)
-		end
-	end, { nargs = "?" })
+
+vim.api.nvim_create_user_command("TabTermRename", function(opts)
+	M.rename(opts.args)
+end, { nargs = "?" })
 
 	--TODO: modificar esse autocmd
 	-- vim.api.nvim_create_autocmd({ "BufEnter", "TermEnter" }, {
