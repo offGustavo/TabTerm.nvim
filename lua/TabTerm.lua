@@ -6,7 +6,9 @@ local current_index = 1
 M.terminal_win = nil
 
 local config = {
-  separator = "",
+  separator_right = "",
+  separator_left = "",
+  separator_first = "█",
   separator_highlight = nil,
   tab_highlight = "%#TablineSel#",
   default_highlight = "%#Tabline#",
@@ -41,23 +43,25 @@ local function updateWinbar()
     local winbar = ""
     for i, term in ipairs(terminals) do
       if i == 1 and i == index then
-        winbar = winbar
-        .. string.format(
-          "%s %d:%s %%#TabTermSeparator#%s%%*",
-          config.tab_highlight,
-          i,
-          term.name,
-          config.separator
-        )
+          winbar = winbar
+          .. string.format(
+            "%%#TabTermSeparator#%s%s %d:%s %%#TabTermSeparator#%s%%*",
+            config.separator_first,
+            config.tab_highlight,
+            i,
+            term.name,
+            config.separator_right
+          )
       else
         if i == index then
           winbar = winbar
           .. string.format(
-            "%%#TabTermSeparator#%s %d:%s %%#TabTermSeparator#%s%%*",
+            "%%#TabTermSeparator#%s%s %d:%s %%#TabTermSeparator#%s%%*",
+            config.separator_left,
             config.tab_highlight,
             i,
             term.name,
-            config.separator
+            config.separator_right
           )
         else
           winbar = winbar .. string.format("  %d:%s  ", i, term.name)
