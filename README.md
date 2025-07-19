@@ -46,8 +46,6 @@ Yet Another Minimal Plugin for Terminals with tabs in Neovim
   },
 ```
 
-
-
 # My Config
 
 ```lua
@@ -84,10 +82,21 @@ return {
 }
 ```
 
-
 ## Commands
 
 ```vim
+
+" Create a new TabTerm terminal
+:TabTermNew
+
+" Toggle TabTerm bottom window
+:TabTermToggle
+
+" Close current terminal
+:TabTermClose
+
+" Close terminal by id
+:TabTermClose 1
 
 " Prompt for a new name for the current terminal (uses vim.input)
 :TabTermRename
@@ -99,4 +108,3 @@ return {
 :TabTermRename 1:new_name
 
 ```
-
