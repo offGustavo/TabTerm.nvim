@@ -83,3 +83,20 @@ return {
   end,
 }
 ```
+
+
+## Commands
+
+```vim
+
+" Prompt for a new name for the current terminal (uses vim.input)
+:TabTermRename
+
+" Rename the current terminal to 'new_name'
+:TabTermRename new_name
+
+" Rename the terminal with ID 1 to 'new_name'
+:TabTermRename 1:new_name
+
+```
+
