@@ -1,16 +1,21 @@
-# TabTerm
+* TabTerm
 
-Yet Another Minimal Plugin for Terminals with tabs in Neovim
+Yet Another Minimal Plugin for Multi Term
 
-## Install with [folke/lazy.nvim](https://github.com/folke/lazy.nvim)
+** Install with [folke/lazy.nvim](https://github.com/folke/lazy.nvim)
 
-```lua
+
+#+begin_src lua
   { -- lazy.nvim
     'offGustavo/TabTerm.nvim',
+    -- Or use require('TabTerm.nvim').setup()
+    -- if you want some customization see bellow
     opts = {},
+    lazy = true,
     keys = function()
       local keys = {
 
+        -- [[ Keymaps Exemples ]]--
         -- Like Tmux Prefix
         { mode ={ 'i', 'n', 't'}, "<C-s>c", function () require('TabTerm').new() end, desc = "Create Terminal"},
         { mode ={ 'i', 'n', 't'}, "<C-s>x", function () require('TabTerm').close() end, desc = "Create Terminal"},
@@ -44,26 +49,28 @@ Yet Another Minimal Plugin for Terminals with tabs in Neovim
       return keys
     end,
   },
-```
+#+end_src
 
+or use your favorite plugin manager
+
+#+begin_src lua
+Plug 'offGustavo/TabTerm.nvim'
+
+require('')
+#+end_src
 # My Config
 
-```lua
+#+begin_src lua
 return {
   'offGustavo/TabTerm.nvim',
   opts = {},
   keys = function()
     local keys = {
 
-      { mode ={ 'i', 'n', 't'}, "<A-m>c", function () require('TabTerm').new() end, desc = "Create Terminal"},
-      { mode ={ 'i', 'n', 't'}, "<A-m>x", function () require('TabTerm').close() end, desc = "Close Terminal"},
-      { mode ={ 'i', 'n', 't'}, "<A-m>d", function () require('TabTerm').toggle() end, desc = "Toggle Terminal"},
-      { mode ={ 'i', 'n', 't'}, "<A-m>,", function () require('TabTerm').rename() end, desc = "Rename Terminal"},
-
-      { mode ={ 'i', 'n', 't'}, "<A-n>", function () require('TabTerm').new() end, desc = "Create Terminal"},
-      { mode ={ 'i', 'n', 't'}, "<A-x>", function () require('TabTerm').close() end, desc = "Close Terminal"},
-      { mode ={ 'i', 'n', 't'}, "<A-/>", function () require('TabTerm').toggle() end, desc = "Toggle Terminal"},
-      { mode ={ 'i', 'n', 't'}, "<A-,>", function () require('TabTerm').rename() end, desc = "Rename Terminal"},
+      { mode = { 'i', 'n', 't'}, "<A-m>c", function () require('TabTerm').new() end, desc = "Create Terminal"},
+      { mode = { 'i', 'n', 't'}, "<A-m>x", function () require('TabTerm').close() end, desc = "Close Terminal"},
+      { mode = { 'i', 'n', 't'}, "<A-m>,", function () require('TabTerm').rename() end, desc = "Rename Terminal"},
+      { mode = { 'i', 'n', 't'}, "<A-/>", function () require('TabTerm').toggle() end, desc = "Toggle Terminal"},
 
     }
 
@@ -80,31 +87,69 @@ return {
     return keys
   end,
 }
-```
+#+end_src
 
-## Commands
+** Vim Commands
 
-```vim
-
-" Create a new TabTerm terminal
+- Create a new TabTerm terminal
 :TabTermNew
 
-" Toggle TabTerm bottom window
+- Toggle TabTerm bottom window
 :TabTermToggle
 
-" Close current terminal
+- Close current terminal
 :TabTermClose
 
-" Close terminal by id
-:TabTermClose 1
+- Close terminal by id
+:TabTermClose <n>
 
-" Prompt for a new name for the current terminal (uses vim.input)
+- Prompt for a new name for the current terminal (uses vim.input)
 :TabTermRename
 
-" Rename the current terminal to 'new_name'
+- Rename the current terminal to 'new_name'
 :TabTermRename new_name
 
-" Rename the terminal with ID 1 to 'new_name'
-:TabTermRename 1:new_name
+- Rename the terminal with ID <n> to 'new_name'
+:TabTermRename <n>:new_name
 
-```
+** Customization
+
+*** Default Config
+
+#+begin_src  lua
+{
+  separator_right = "",
+  separator_left = "",
+  separator_first = "█",
+  tab_highlight = "%#TablineSel#",
+  default_highlight = "%#Tabline#",
+}
+#+end_src
+
+*** Custom Exemples
+#+begin_src  lua
+opts = {
+    separator_right = "",
+    separator_left = "",
+    separator_first = "█",
+},
+
+    -- or
+
+require('TabTerm').setup({
+    separator_right = "",
+    separator_left = "",
+    separator_first = "█",
+})
+
+#+end_src
+
+* This Plugin is in Alpha!!
+
+For some plobems you have make an issue, i would like to help you
+
+** TODO
+- [ ] Remade the winbar config, to make it more customizable
+- [ ] Make Vim Docs
+** FIX
+- [ ] Split Always Bellow
