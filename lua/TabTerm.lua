@@ -9,7 +9,6 @@ local config = {
   separator_right = "",
   separator_left = "",
   separator_first = "█",
-  separator_highlight = nil,
   tab_highlight = "%#TablineSel#",
   default_highlight = "%#Tabline#",
 }
