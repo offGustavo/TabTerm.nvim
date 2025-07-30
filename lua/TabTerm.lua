@@ -37,7 +37,7 @@ local function updateWinbar()
       bold = false,
     })
 
-    -- TODO: Fazer isso mais personalizavél, permitindo que usuário escolha
+    -- TODO: Fazer isso mais personalizavél parecido com o que é a statusline/
     -- local winbar = "%="
     local winbar = ""
     for i, term in ipairs(terminals) do
@@ -282,7 +282,7 @@ end, { nargs = "?" })
 function M.goto(index)
   local term = terminals[index]
   if not term then
-    print("Terminal " .. (index or "?") .. " não existe.")
+    print("Termnal " .. (index or "?") .. "don't exisits.")
     return
   end
 
@@ -304,6 +304,7 @@ end
   -- 		updateWinbar()
   -- 	end,
   -- })
+
 end
 
 _G.TabTerm = M
