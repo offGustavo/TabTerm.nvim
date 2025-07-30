@@ -1,16 +1,15 @@
-* TabTerm
+# TabTerm
 
 Yet Another Minimal Plugin for Multi Term
 
-** Install with [[https:github.com/folke/lazy.nvim][folke/lazy.nvim]]
+## Install with [folke/lazy.nvim: 💤 A modern plugin manager for Neovim](https://github.com/folke/lazy.nvim)
 
-
-#+begin_src lua
+``` lua
   { -- lazy.nvim
     'offGustavo/TabTerm.nvim',
-    -- Or use require('TabTerm.nvim').setup()
+    opts = {}, --  Call setup()
+    -- Or use require('TabTerm.nvim').setup() in somewhere in your config
     -- if you want some customization see bellow
-    opts = {},
     lazy = true,
     keys = function()
       local keys = {
@@ -49,9 +48,10 @@ Yet Another Minimal Plugin for Multi Term
       return keys
     end,
   },
-#+end_src
+  ```
 
 or use your favorite plugin manager
+
 
 ** Vim Commands
 
@@ -83,7 +83,7 @@ or use your favorite plugin manager
 
 *** Default Config
 
-#+begin_src  lua
+```lua
 {
   separator_right = "",
   separator_left = "",
@@ -109,15 +109,16 @@ require('TabTerm').setup({
     separator_first = "█",
 })
 
-#+end_src
+```
 
-* This Plugin is in Alpha!!
+# This Plugin is in Alpha!!
 
 For some problem you have make an issue, i would like to help you
 
-** Todo
+## Todo
 - [ ] Remade the winbar config, to make it more customizable
 - [ ] Make Vim Docs
 - [ ] Allow the goto keymap acepts +1 or -1 motions
-** Fix
+## Fix
 - [ ] Split Always Bellow
+- [ ] When toggle keymap is activate, if it was not a tabterm window go to tabterm
