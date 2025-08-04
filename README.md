@@ -138,24 +138,11 @@ require('TabTerm').setup({
 })
 ```
 
----
+## Todo
 
-## ⚠️ Plugin Status: Alpha
-
-This plugin is currently in early development.
-If you encounter any issues, please open an issue — I’d be happy to help!
-
----
-
-### Fixes
-
-
----
-
-### Todo
-
-* [ ] Rewrite winbar configuration to allow more customization
+* [ ] Rewrite `winbar` configuration to allow more customization
 * [ ] Add Vim help documentation
 * [ ] Allow `goto` keymaps to support relative motions (e.g. `+1`, `-1`)
+* [ ] Allow Vertical Splits
 
 
