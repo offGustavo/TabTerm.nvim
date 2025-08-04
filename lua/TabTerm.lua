@@ -262,6 +262,28 @@ function M.setup(user_config)
     end,
   })
 
+vim.api.nvim_create_autocmd("BufWipeout", {
+  callback = function(args)
+    local ok, created = pcall(vim.api.nvim_buf_get_var, args.buf, 'tabterm_created')
+    if ok and created then
+      for i, term in ipairs(terminals) do
+        if term.bufnr == args.buf then
+          table.remove(terminals, i)
+          if current_index > #terminals then
+            current_index = #terminals
+          end
+          break
+        end
+      end
+      if M.terminal_win and not vim.api.nvim_win_is_valid(M.terminal_win) then
+        M.terminal_win = nil
+      end
+      if #terminals == 0 then
+        vim.wo.winbar = ""
+      end
+    end
+  end,
+})
   vim.api.nvim_create_user_command("TabTermToggle", M.toggle, {})
 
   vim.api.nvim_create_user_command("TabTermNew", M.new, {})

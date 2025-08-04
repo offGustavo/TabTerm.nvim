@@ -149,7 +149,6 @@ If you encounter any issues, please open an issue — I’d be happy to help!
 
 ### Fixes
 
-- [ ] When close by `:q` make the plugin remove the buffer correctly
 
 ---
 
