@@ -1,6 +1,6 @@
 local M = {}
 
--- TODO: Criar uma forma que permia queo terminal seja mostrado em uma janela flutuante
+-- TODO: Criar uma forma que permita que o terminal seja mostrado em uma janela flutuante
 local terminals = {}
 local current_index = 1
 M.terminal_win = nil
@@ -98,7 +98,7 @@ function M.new(name)
   if win then
     vim.api.nvim_set_current_win(win)
   else
-    vim.cmd("split")
+    vim.cmd("botright split")
     M.terminal_win = vim.api.nvim_get_current_win()
   end
 
@@ -160,7 +160,7 @@ function M.close(index)
     end
 
     if not (M.terminal_win and vim.api.nvim_win_is_valid(M.terminal_win)) then
-      vim.cmd("split")
+      vim.cmd("botright split")
       M.terminal_win = vim.api.nvim_get_current_win()
     else
       vim.api.nvim_set_current_win(M.terminal_win)
@@ -177,7 +177,7 @@ function M.toggle()
     vim.api.nvim_win_close(win, true)
     M.terminal_win = nil
   elseif #terminals > 0 then
-    vim.cmd("split")
+    vim.cmd("botright split")
     M.terminal_win = vim.api.nvim_get_current_win()
     vim.api.nvim_set_current_buf(terminals[current_index].bufnr)
     updateWinbar()
@@ -235,7 +235,7 @@ function M.goto(index)
   if win then
     vim.api.nvim_set_current_win(win)
   else
-    vim.cmd("split")
+    vim.cmd("botright split")
     M.terminal_win = vim.api.nvim_get_current_win()
   end
   vim.api.nvim_set_current_buf(term.bufnr)
@@ -291,14 +291,14 @@ function M.goto(index)
   if win then
     vim.api.nvim_set_current_win(win)
   else
-    vim.cmd("split")
+    vim.cmd("botright split")
     M.terminal_win = vim.api.nvim_get_current_win()
   end
   vim.api.nvim_set_current_buf(term.bufnr)
   updateWinbar()
 end
 
-  --TODO: modificar esse autocmd
+  --TODO: fix this
   -- vim.api.nvim_create_autocmd({ "BufEnter", "TermEnter" }, {
   -- 	callback = function()
   -- 		updateWinbar()

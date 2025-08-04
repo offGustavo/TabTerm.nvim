@@ -149,7 +149,6 @@ If you encounter any issues, please open an issue — I’d be happy to help!
 
 ### Fixes
 
-* [ ] Always split terminals below
 * [ ] When toggling, if not inside a TabTerm window, switch to one automatically
 
 ---
