@@ -1,87 +1,114 @@
 # TabTerm
 
-Yet Another Minimal Plugin for Multi Term
+Yet Another Plugin for Multi-Terminal in Neovim.
 
-## Install with [folke/lazy.nvim: 💤 A modern plugin manager for Neovim](https://github.com/folke/lazy.nvim)
+## Installation (with [folke/lazy.nvim](https://github.com/folke/lazy.nvim))
 
-``` lua
-  { -- lazy.nvim
-    'offGustavo/TabTerm.nvim',
-    opts = {}, --  Call setup()
-    -- Or use require('TabTerm.nvim').setup() in somewhere in your config
-    -- if you want some customization see bellow
-    lazy = true,
-    keys = function()
-      local keys = {
+```lua
+{
+  'offGustavo/TabTerm.nvim',
+  opts = {}, -- Calls setup()
+  -- Or use require('TabTerm').setup() somewhere in your config
+  -- For customization, see below
+  lazy = true,
+  keys = function()
+    local keys = {
+      -- [[ Example Keymaps ]] --
 
-        -- [[ Keymaps Exemples ]]--
-        -- Like Tmux Prefix
-        { mode ={ 'i', 'n', 't'}, "<C-s>c", function () require('TabTerm').new() end, desc = "Create Terminal"},
-        { mode ={ 'i', 'n', 't'}, "<C-s>x", function () require('TabTerm').close() end, desc = "Create Terminal"},
-        { mode ={ 'i', 'n', 't'}, "<C-s>d", function () require('TabTerm').toggle() end, desc = "Create Terminal"},
-        { mode ={ 'i', 'n', 't'}, "<C-s>,", function () require('TabTerm').rename() end, desc = "Create Terminal"},
+      -- Tmux-like Prefix
+      { mode = { 'i', 'n', 't' }, "<C-s>c", function() require('TabTerm').new() end, desc = "Create Terminal" },
+      { mode = { 'i', 'n', 't' }, "<C-s>x", function() require('TabTerm').close() end, desc = "Close Terminal" },
+      { mode = { 'i', 'n', 't' }, "<C-s>d", function() require('TabTerm').toggle() end, desc = "Toggle Terminal" },
+      { mode = { 'i', 'n', 't' }, "<C-s>,", function() require('TabTerm').rename() end, desc = "Rename Terminal" },
 
-        -- Like Vim Leader
-        { "<leader>tc", function () require('TabTerm').new() end, desc = "Create Terminal"},
-        { "<leader>tx", function () require('TabTerm').close() end, desc = "Create Terminal"},
-        { "<leader>td", function () require('TabTerm').toggle() end, desc = "Create Terminal"},
-        { "<leader>t,", function () require('TabTerm').rename() end, desc = "Create Terminal"},
+      -- Vim Leader-style
+      { "<leader>tc", function() require('TabTerm').new() end, desc = "Create Terminal" },
+      { "<leader>tx", function() require('TabTerm').close() end, desc = "Close Terminal" },
+      { "<leader>td", function() require('TabTerm').toggle() end, desc = "Toggle Terminal" },
+      { "<leader>t,", function() require('TabTerm').rename() end, desc = "Rename Terminal" },
 
-        -- Just Shortcuts
-        { mode ={ 'i', 'n', 't'}, "<A-n>", function () require('TabTerm').new() end, desc = "Create Terminal"},
-        { mode ={ 'i', 'n', 't'}, "<A-x>", function () require('TabTerm').close() end, desc = "Create Terminal"},
-        { mode ={ 'i', 'n', 't'}, "<A-/>", function () require('TabTerm').toggle() end, desc = "Create Terminal"},
-        { mode ={ 'i', 'n', 't'}, "<A-,>", function () require('TabTerm').rename() end, desc = "Create Terminal"},
+      -- Shortcut-style
+      { mode = { 'i', 'n', 't' }, "<A-n>", function() require('TabTerm').new() end, desc = "Create Terminal" },
+      { mode = { 'i', 'n', 't' }, "<A-x>", function() require('TabTerm').close() end, desc = "Close Terminal" },
+      { mode = { 'i', 'n', 't' }, "<A-/>", function() require('TabTerm').toggle() end, desc = "Toggle Terminal" },
+      { mode = { 'i', 'n', 't' }, "<A-,>", function() require('TabTerm').rename() end, desc = "Rename Terminal" },
+    }
 
-      }
+    for i = 1, 9 do
+      table.insert(keys, {
+        mode = { 'i', 'n', 't' },
+        "<C-s>" .. i,
+        function()
+          require('TabTerm').goto(i)
+        end,
+        desc = "Go to Terminal [" .. i .. "]",
+      })
+    end
 
-      for i = 1, 9 do
-        table.insert(keys, {
-          mode ={ 'i', 'n', 't'},
-          "<C-s>" .. i,
-          function()
-            require('TabTerm').goto(i)
-          end,
-          desc = "Goto to Terminal [" .. i .. "]",
-        })
-      end
-      return keys
-    end,
-  },
+    return keys
+  end,
+}
+````
+
+Or use your favorite plugin manager.
+
+---
+
+## Vim Commands
+
+* Create a new terminal:
+
+  ```
+  :TabTermNew<CR>
   ```
 
-or use your favorite plugin manager
+* Toggle the bottom terminal window:
 
+  ```
+  :TabTermToggle<CR>
+  ```
 
-** Vim Commands
+* Close the current terminal:
 
-- Create a new TabTerm terminal
-:TabTermNew<Cr>
+  ```
+  :TabTermClose<CR>
+  ```
 
-- Toggle TabTerm bottom window
-:TabTermToggle<Cr>
+* Close terminal by ID:
 
-- Close current terminal
-:TabTermClose<Cr>
+  ```
+  :TabTermClose {1..n}<CR>
+  ```
 
-- Close terminal by id
-:TabTermClose {1..n}<Cr>
+* Prompt to rename the current terminal (uses `vim.input()`):
 
-- Prompt for a new name for the current terminal (uses vim.input)
-:TabTermRename<Cr>
+  ```
+  :TabTermRename<CR>
+  ```
 
-- Rename the current terminal to 'new_name'
-:TabTermRename new_name<Cr>
+* Rename current terminal to `new_name`:
 
-- Rename the terminal with ID <n> to 'new_name'
-:TabTermRename {1..n}:new_name<Cr>
+  ```
+  :TabTermRename new_name<CR>
+  ```
 
-- Go to terminal with ID <n>
-:TabTermGoTo {1..n}<Cr>
+* Rename terminal with ID `<n>` to `new_name`:
 
-** Customization
+  ```
+  :TabTermRename {1..n}:new_name<CR>
+  ```
 
-*** Default Config
+* Go to terminal with ID `<n>`:
+
+  ```
+  :TabTermGoTo {1..n}<CR>
+  ```
+
+---
+
+## Customization
+
+### Default Configuration
 
 ```lua
 {
@@ -91,35 +118,46 @@ or use your favorite plugin manager
   tab_highlight = "%#TablineSel#",
   default_highlight = "%#Tabline#",
 }
-#+end_src
-
-*** Custom Exemples
-#+begin_src  lua
-opts = {
-    separator_right = "",
-    separator_left = "",
-    separator_first = "█",
-},
-
-    -- or
-
-require('TabTerm').setup({
-    separator_right = "",
-    separator_left = "",
-    separator_first = "█",
-})
-
 ```
 
-# This Plugin is in Alpha!!
+### Custom Examples
 
-For some problem you have make an issue, i would like to help you
+```lua
+opts = {
+  separator_right = "",
+  separator_left = "",
+  separator_first = "█",
+}
 
-## Fix
-- [ ] Split Always Bellow
-- [ ] When toggle keymap is activate, if it was not a tabterm window go to tabterm
+-- or just 
 
-## Todo
-- [ ] Remade the winbar config, to make it more customizable
-- [ ] Make Vim Docs
-- [ ] Allow the goto keymap acepts +1 or -1 motions
+require('TabTerm').setup({
+  separator_right = "",
+  separator_left = "",
+  separator_first = "█",
+})
+```
+
+---
+
+## ⚠️ Plugin Status: Alpha
+
+This plugin is currently in early development.
+If you encounter any issues, please open an issue — I’d be happy to help!
+
+---
+
+### Fixes
+
+* [ ] Always split terminals below
+* [ ] When toggling, if not inside a TabTerm window, switch to one automatically
+
+---
+
+### Todo
+
+* [ ] Rewrite winbar configuration to allow more customization
+* [ ] Add Vim help documentation
+* [ ] Allow `goto` keymaps to support relative motions (e.g. `+1`, `-1`)
+
+
