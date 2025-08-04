@@ -115,10 +115,11 @@ require('TabTerm').setup({
 
 For some problem you have make an issue, i would like to help you
 
+## Fix
+- [ ] Split Always Bellow
+- [ ] When toggle keymap is activate, if it was not a tabterm window go to tabterm
+
 ## Todo
 - [ ] Remade the winbar config, to make it more customizable
 - [ ] Make Vim Docs
 - [ ] Allow the goto keymap acepts +1 or -1 motions
-## Fix
-- [ ] Split Always Bellow
-- [ ] When toggle keymap is activate, if it was not a tabterm window go to tabterm
