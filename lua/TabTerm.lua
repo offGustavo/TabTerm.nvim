@@ -171,11 +171,18 @@ function M.close(index)
   end
 end
 
+
 function M.toggle()
   local win = find_terminal_window()
+  local cur_win = vim.api.nvim_get_current_win()
+
   if win then
-    vim.api.nvim_win_close(win, true)
-    M.terminal_win = nil
+    if win == cur_win then
+      vim.api.nvim_win_close(win, true)
+      M.terminal_win = nil
+    else
+      vim.api.nvim_set_current_win(win)
+    end
   elseif #terminals > 0 then
     vim.cmd("botright split")
     M.terminal_win = vim.api.nvim_get_current_win()
@@ -185,6 +192,7 @@ function M.toggle()
     M.new()
   end
 end
+
 
 function M.rename(input)
   -- Se nenhum input foi passado, pedir ao usuário

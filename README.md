@@ -149,7 +149,7 @@ If you encounter any issues, please open an issue — I’d be happy to help!
 
 ### Fixes
 
-* [ ] When toggling, if not inside a TabTerm window, switch to one automatically
+- [ ] When close by `:q` make the plugin remove the buffer correctly
 
 ---
 
