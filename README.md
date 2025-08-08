@@ -11,6 +11,8 @@ Yet Another Plugin for Multi-Terminal in Neovim.
   -- Or use require('TabTerm').setup() somewhere in your config
   -- For customization, see below
   lazy = true,
+  -- Ensure the commands are available with lazy loading
+  cmd = {"TabTermNew","TabTermToggle"},
   keys = function()
     local keys = {
       -- [[ Example Keymaps ]] --
@@ -147,5 +149,6 @@ require('TabTerm').setup({
 * [ ] Allow `goto` keymaps to support relative motions (e.g. `+1`, `-1`)
 * [ ] Allow Vertical Splits
 * [ ] Float Terminal
+* [ ] Allow Mouse Interaction
 
 
