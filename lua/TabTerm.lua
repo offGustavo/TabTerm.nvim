@@ -13,8 +13,6 @@ local config = {
   vertical_size = 20,
 }
 
-
-
 local function update_winbar()
   local bufnr = vim.api.nvim_get_current_buf()
 
@@ -77,7 +75,6 @@ local function update_winbar()
   end
 end
 
-
 local function find_terminal_window()
   if M.terminal_win and vim.api.nvim_win_is_valid(M.terminal_win) then
     return M.terminal_win
@@ -95,16 +92,17 @@ local function find_terminal_window()
 end
 
 local function create_split(new)
-  if new then
-    vim.cmd("botright split")
-    vim.api.nvim_win_set_height(0, config.vertical_size)
-    M.terminal_win = vim.api.nvim_get_current_win()
-  else
+  --NOTE: this mus be inverted, 
+  if not new then
     vim.cmd("botright split")
     M.terminal_win = vim.api.nvim_get_current_win()
     vim.api.nvim_win_set_height(0, config.vertical_size)
     vim.api.nvim_set_current_buf(terminals[current_index].bufnr)
     update_winbar()
+  else
+    vim.cmd("botright split")
+    vim.api.nvim_win_set_height(0, config.vertical_size)
+    M.terminal_win = vim.api.nvim_get_current_win()
   end
 end
 
@@ -145,6 +143,7 @@ function M.close(index)
       end
     end
     if not index then
+    -- FIXME: wrong speel
       print("Not a Terminal Buffer")
       return
     end
@@ -175,8 +174,7 @@ function M.close(index)
     end
 
     if not (M.terminal_win and vim.api.nvim_win_is_valid(M.terminal_win)) then
-      vim.cmd("botright split")
-      M.terminal_win = vim.api.nvim_get_current_win()
+      create_split()
     else
       vim.api.nvim_set_current_win(M.terminal_win)
     end
@@ -185,7 +183,6 @@ function M.close(index)
     update_winbar()
   end
 end
-
 
 function M.toggle()
   local win = find_terminal_window()
@@ -205,7 +202,6 @@ function M.toggle()
     M.new()
   end
 end
-
 
 function M.rename(input)
   -- Se nenhum input foi passado, pedir ao usuário
@@ -242,7 +238,6 @@ function M.rename(input)
   -- TODO: Melhorar as mensagens de erro
   print("Can't rename, the current buffers is not a tabterm terminal.")
 end
-
 
 function M.goto(index)
   local term = terminals[index]
@@ -348,6 +343,7 @@ end
 
 end
 
+--NOTE: this is necessry? Maybe jsut use require is best than this...idk...
 _G.TabTerm = M
 
 return M
