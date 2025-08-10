@@ -105,9 +105,7 @@ function M.new(name)
   vim.cmd("term")
   local bufnr = vim.api.nvim_get_current_buf()
 
-  -- Marcar apenas os buffers criados pelo TabTerm como não listados
-  vim.api.nvim_buf_set_option(bufnr, 'buflisted', false)
-  -- Adicionar uma variável de buffer para identificar que foi criado pelo TabTerm
+  vim.api.nvim_set_option_value('buflisted', false , { buf = 0 })
   vim.api.nvim_buf_set_var(bufnr, 'tabterm_created', true)
 
   table.insert(terminals, { bufnr = bufnr, name = name })
