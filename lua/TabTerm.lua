@@ -13,6 +13,8 @@ local config = {
   vertical_size = 20,
 }
 
+
+
 local function updateWinbar()
   local bufnr = vim.api.nvim_get_current_buf()
 
@@ -75,6 +77,7 @@ local function updateWinbar()
   end
 end
 
+
 local function find_terminal_window()
   if M.terminal_win and vim.api.nvim_win_is_valid(M.terminal_win) then
     return M.terminal_win
@@ -91,6 +94,20 @@ local function find_terminal_window()
   return nil
 end
 
+local function create_split(new)
+  if new then
+    vim.cmd("botright split")
+    vim.api.nvim_win_set_height(0, config.vertical_size)
+    M.terminal_win = vim.api.nvim_get_current_win()
+  else
+    vim.cmd("botright split")
+    M.terminal_win = vim.api.nvim_get_current_win()
+    vim.api.nvim_win_set_height(0, config.vertical_size)
+    vim.api.nvim_set_current_buf(terminals[current_index].bufnr)
+    updateWinbar()
+  end
+end
+
 function M.new(name)
   name = name or ("term" .. (#terminals + 1))
 
@@ -98,9 +115,7 @@ function M.new(name)
   if win then
     vim.api.nvim_set_current_win(win)
   else
-    vim.cmd("botright split")
-    vim.api.nvim_win_set_height(0, config.vertical_size)
-    M.terminal_win = vim.api.nvim_get_current_win()
+    create_split(true)
   end
 
   vim.cmd("term")
@@ -178,16 +193,14 @@ function M.toggle()
 
   if win then
     if win == cur_win then
+      config.vertical_size = vim.api.nvim_win_get_height(win)
       vim.api.nvim_win_close(win, true)
       M.terminal_win = nil
     else
       vim.api.nvim_set_current_win(win)
     end
   elseif #terminals > 0 then
-    vim.cmd("botright split")
-    M.terminal_win = vim.api.nvim_get_current_win()
-    vim.api.nvim_set_current_buf(terminals[current_index].bufnr)
-    updateWinbar()
+    create_split()
   else
     M.new()
   end
@@ -243,8 +256,7 @@ function M.goto(index)
   if win then
     vim.api.nvim_set_current_win(win)
   else
-    vim.cmd("botright split")
-    M.terminal_win = vim.api.nvim_get_current_win()
+    create_split()
   end
   vim.api.nvim_set_current_buf(term.bufnr)
   updateWinbar()
@@ -321,8 +333,7 @@ function M.goto(index)
   if win then
     vim.api.nvim_set_current_win(win)
   else
-    vim.cmd("botright split")
-    M.terminal_win = vim.api.nvim_get_current_win()
+      create_split()
   end
   vim.api.nvim_set_current_buf(term.bufnr)
   updateWinbar()
