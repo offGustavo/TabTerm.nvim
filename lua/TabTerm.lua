@@ -15,7 +15,7 @@ local config = {
 
 
 
-local function updateWinbar()
+local function update_winbar()
   local bufnr = vim.api.nvim_get_current_buf()
 
   local index = nil
@@ -104,7 +104,7 @@ local function create_split(new)
     M.terminal_win = vim.api.nvim_get_current_win()
     vim.api.nvim_win_set_height(0, config.vertical_size)
     vim.api.nvim_set_current_buf(terminals[current_index].bufnr)
-    updateWinbar()
+    update_winbar()
   end
 end
 
@@ -128,10 +128,10 @@ function M.new(name)
   table.insert(terminals, { bufnr = bufnr, name = name })
   current_index = #terminals
 
-  updateWinbar()
+  update_winbar()
 
   vim.schedule(function()
-    updateWinbar()
+    update_winbar()
   end)
 end
 
@@ -182,7 +182,7 @@ function M.close(index)
     end
 
     vim.api.nvim_set_current_buf(terminals[current_index].bufnr)
-    updateWinbar()
+    update_winbar()
   end
 end
 
@@ -223,7 +223,7 @@ function M.rename(input)
     index = tonumber(index)
     if terminals[index] then
       terminals[index].name = new_name
-      updateWinbar()
+      update_winbar()
     else
       print("Terminal " .. index .. " dosen't exists.")
     end
@@ -235,7 +235,7 @@ function M.rename(input)
   for i, term in ipairs(terminals) do
     if term.bufnr == bufnr then
       terminals[i].name = input
-      updateWinbar()
+      update_winbar()
       return
     end
   end
@@ -259,7 +259,7 @@ function M.goto(index)
     create_split()
   end
   vim.api.nvim_set_current_buf(term.bufnr)
-  updateWinbar()
+  update_winbar()
 end
 
 function M.setup(user_config)
@@ -336,7 +336,7 @@ function M.goto(index)
       create_split()
   end
   vim.api.nvim_set_current_buf(term.bufnr)
-  updateWinbar()
+  update_winbar()
 end
 
   --TODO: fix this
