@@ -1,16 +1,16 @@
 local M = {}
 
--- TODO: Criar uma forma que permita que o terminal seja mostrado em uma janela flutuante
 local terminals = {}
 local current_index = 1
 M.terminal_win = nil
 
 local config = {
-  separator_right = "",
-  separator_left = "",
+  separator_right = "",
+  separator_left = "",
   separator_first = "█",
   tab_highlight = "%#TablineSel#",
   default_highlight = "%#Tabline#",
+  vertical_size = 20,
 }
 
 local function updateWinbar()
@@ -99,6 +99,7 @@ function M.new(name)
     vim.api.nvim_set_current_win(win)
   else
     vim.cmd("botright split")
+    vim.api.nvim_win_set_height(0, config.vertical_size)
     M.terminal_win = vim.api.nvim_get_current_win()
   end
 
@@ -106,6 +107,7 @@ function M.new(name)
   local bufnr = vim.api.nvim_get_current_buf()
 
   vim.api.nvim_set_option_value('buflisted', false , { buf = 0 })
+
   vim.api.nvim_buf_set_var(bufnr, 'tabterm_created', true)
 
   table.insert(terminals, { bufnr = bufnr, name = name })

@@ -112,14 +112,16 @@ Or use your favorite plugin manager.
 
 ```lua
 {
-  separator_right = "",
-  separator_left = "",
+  separator_right = "",
+  separator_left = "",
   separator_first = "█",
   tab_highlight = "%#TablineSel#",
   default_highlight = "%#Tabline#",
+  vertical_size = 20,
 }
 ```
 
+TODO: change this
 ### Custom Examples
 
 ```lua
@@ -144,5 +146,6 @@ require('TabTerm').setup({
 * [ ] Add Vim help documentation
 * [ ] Allow `goto` keymaps to support relative motions (e.g. `+1`, `-1`)
 * [ ] Allow Vertical Splits
+* [ ] Float Terminal
 
 
