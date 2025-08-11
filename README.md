@@ -63,6 +63,10 @@ Or use your favorite plugin manager.
   ```
   :TabTermNew<CR>
   ```
+  * With a custom `name`
+    ```
+    :TabTermNew {name}<CR>
+    ```
 
 * Toggle the bottom terminal window:
 
