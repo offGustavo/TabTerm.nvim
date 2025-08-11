@@ -106,27 +106,37 @@ local function create_split(new)
   end
 end
 
-function M.new(name)
-  name = name or ("term" .. (#terminals + 1))
-
+function M.new(opts)
+  local name, cmd
+  if opts then
+    local parts = vim.split(name_or_full, ":", { plain = true })
+name = (parts[1] ~= "" and parts[1]) or ("term" .. (#terminals + 1))
+    cmd = parts[2]
+  else
+    name = "term" .. (#terminals + 1)
+  end
   local win = find_terminal_window()
   if win then
     vim.api.nvim_set_current_win(win)
   else
     create_split(true)
   end
-
   vim.cmd("term")
   local bufnr = vim.api.nvim_get_current_buf()
 
   vim.api.nvim_set_option_value('buflisted', false , { buf = 0 })
-
   vim.api.nvim_buf_set_var(bufnr, 'tabterm_created', true)
 
   table.insert(terminals, { bufnr = bufnr, name = name })
   current_index = #terminals
 
   update_winbar()
+
+  -- se foi passado comando, envia pro terminal
+  if cmd and cmd ~= "" then
+    -- envia e adiciona \n para executar
+    vim.fn.chansend(vim.b.terminal_job_id, cmd .. "\n")
+  end
 
   vim.schedule(function()
     update_winbar()
@@ -293,7 +303,9 @@ vim.api.nvim_create_autocmd("BufWipeout", {
 })
   vim.api.nvim_create_user_command("TabTermToggle", M.toggle, {})
 
-  vim.api.nvim_create_user_command("TabTermNew", M.new, {})
+vim.api.nvim_create_user_command("TabTermNew", function(opts)
+  M.new(opts.args ~= "" and opts.args or nil)
+end, { nargs = "?" })
 
   -- FIXME: pass the logic to module function
   vim.api.nvim_create_user_command("TabTermClose", function(opts)
@@ -315,14 +327,12 @@ vim.api.nvim_create_user_command("TabTermGoTo", function(opts)
   local index = tonumber(opts.args) or 1 -- padrão para 1 se não for número
   M.goto(index)
 end, { nargs = "?" })
-
 function M.goto(index)
   local term = terminals[index]
   if not term then
     print("Termnal " .. (index or "?") .. "don't exisits.")
     return
   end
-
   current_index = index
   local win = find_terminal_window()
   if win then
