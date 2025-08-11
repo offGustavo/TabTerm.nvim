@@ -284,9 +284,10 @@ vim.api.nvim_create_autocmd("BufWipeout", {
 })
   vim.api.nvim_create_user_command("TabTermToggle", M.toggle, {})
 
-  vim.api.nvim_create_user_command("TabTermNew", M.new, {})
+vim.api.nvim_create_user_command("TabTermNew", function(opts)
+  M.new(opts.args ~= "" and opts.args or nil)
+end, { nargs = "?" })
 
-  -- FIXME: pass the logic to module function
   vim.api.nvim_create_user_command("TabTermClose", function(opts)
     if opts.args ~= "" then
       local idx = tonumber(opts.args)
