@@ -260,15 +260,6 @@ end
 function M.setup(user_config)
   config = vim.tbl_extend("force", config, user_config or {})
 
-  vim.api.nvim_create_autocmd("TermOpen", {
-    callback = function(args)
-      local is_tabterm = pcall(vim.api.nvim_buf_get_var, args.buf, 'tabterm_created')
-      if is_tabterm then
-        vim.api.nvim_buf_set_option(args.buf, 'buflisted', false)
-      end
-    end,
-  })
-
 vim.api.nvim_create_autocmd("BufWipeout", {
   callback = function(args)
     local ok, created = pcall(vim.api.nvim_buf_get_var, args.buf, 'tabterm_created')
@@ -334,16 +325,9 @@ function M.goto(index)
   update_winbar()
 end
 
-  --TODO: fix this
-  -- vim.api.nvim_create_autocmd({ "BufEnter", "TermEnter" }, {
-  -- 	callback = function()
-  -- 		updateWinbar()
-  -- 	end,
-  -- })
-
 end
 
---NOTE: this is necessry? Maybe jsut use require is best than this...idk...
+--NOTE: this is important? Maybe jsut use require is best than this...idk...
 _G.TabTerm = M
 
 return M
